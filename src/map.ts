@@ -1,3 +1,4 @@
+import GeoJSONLayer from './layers/geojson-layer';
 import VectorLayer from './layers/vector-layer';
 import Renderer from './renderer';
 import MercatorCoordinate from './utils/mercator-coordinate';
@@ -25,12 +26,18 @@ class Map {
     });
   }
 
-  addLayer(options: VectorLayerProps) {
-    const {id, type, ...props} = options;
+  async addLayer(options: VectorLayerProps | GeoJSONLayerProps) {
+    const {id, type} = options;
     if (type === 'vector') {
-      this.renderer.layers.push(new VectorLayer(id, props));
-      this.renderer.updateTiles();
+      this.renderer.layers.push(new VectorLayer(id, options as VectorLayerProps));
+    } else if (type === 'geojson') {
+      const layer = new GeoJSONLayer(id, options as GeoJSONLayerProps);
+      if (!layer.data) {
+        await layer.updateData();
+      }
+      this.renderer.layers.push(layer);
     }
+    this.renderer.updateTiles();
   }
 
   getBounds() {

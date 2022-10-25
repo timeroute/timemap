@@ -10,7 +10,7 @@ class VectorLayer {
   worker: Worker;
   tiles: Record<string, TileDataProps[]> = {};
 
-  constructor(id: string, props: LayerProps) {
+  constructor(id: string, props: VectorLayerProps) {
     this.id = id;
     this.url = props.url;
     if (props.tileSize !== undefined) {
