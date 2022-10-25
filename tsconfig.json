@@ -1,0 +1,32 @@
+{
+  "files": [
+    "src/index.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "typeRoots": [
+      "types",
+      "./node_modules/@types"
+    ],
+    "sourceMap": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "downlevelIteration": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules/**"
+  ]
+}
