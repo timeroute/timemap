@@ -2,12 +2,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: "development",
-  devtool: 'inline-source-map',
-  entry: {
-    index: './src/index.ts',
-    test: './src/test.ts',
-  },
+  mode: "production",
+  entry: './src/index.ts',
   devServer: {
     static: './dist'
   },
@@ -26,18 +22,17 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'timemap dev'
+      template: './index.html',
     })
   ],
   resolve: {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: 'timemap.[name].js',
+    filename: 'timemap.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
+    publicPath: '',
+    library: 'timemap'
   },
-  optimization: {
-    runtimeChunk: 'single'
-  }
 };

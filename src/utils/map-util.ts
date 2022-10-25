@@ -54,8 +54,6 @@ export const fetchTile = async ({ tile, layers, url }: TileProps) => {
 
   const pbf = new Protobuf(res.data);
   const vectorTile = new VectorTile(pbf);
-  console.log(vectorTile);
-  
 
   const tileData: TileDataProps[] = [] // layers -> features
   Object.keys(layers).forEach((layer) => {
