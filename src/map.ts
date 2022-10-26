@@ -40,6 +40,18 @@ class Map {
     this.renderer.updateTiles();
   }
 
+  removeLayer(id: string) {
+    const layer = this.getLayer(id);
+    if (layer) {
+      layer.destroy();
+      this.removeLayer(id);
+    }
+  }
+
+  getLayer(id: string) {
+    return this.renderer.layers.find(layer => layer.id === id);
+  }
+
   getBounds() {
     return this.renderer.calcBounds();
   }

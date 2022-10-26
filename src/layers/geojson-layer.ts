@@ -37,7 +37,8 @@ class GeoJSONLayer {
     const res = await fetch(this.url);
     const data = await res.json();
     this.data = geojsonvt(data, {
-      maxZoom: this.maxZoom
+      maxZoom: this.maxZoom,
+      buffer: 0
     });
   }
 
@@ -64,6 +65,12 @@ class GeoJSONLayer {
       }
       this.tiles[tile] = new Float32Array(vertices);
     })
+  }
+
+  destroy() {
+    this.url = undefined;
+    this.data = undefined;
+    this.tiles = {};
   }
 }
 
