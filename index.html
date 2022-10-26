@@ -38,14 +38,22 @@
   const map = new Map(canvas, {
     center: [120, 30],
     zoom: 4,
-    debug: true
+    debug: false
   });
   map.addLayer({
     id: 'vec',
     type: 'vector',
     url: 'https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=pk.eyJ1IjoiY2hpbmVzZWphciIsImEiOiJjanU5bXFpZ28wN3JtNGRwZGM5MW84czVsIn0.DhHUA_m4clzrzHFGtj97kQ',
-  })
+  });
+  map.addLayer({
+    id: 'geo',
+    type: 'geojson',
+    data: 'https://geojson.cn/api/data/110000.json'
+  });
   console.log(map);
+  setTimeout(() => {
+    map.removeLayer('geo');
+  }, 5000);
 </script>
 
 </html>

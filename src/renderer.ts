@@ -7,12 +7,13 @@ import fs from './shaders/fs.glsl';
 import { mat3 } from "gl-matrix";
 import tilebelt from "@mapbox/tilebelt";
 import { geometryToVertices } from "./utils/map-util";
+import GeoJSONLayer from "./layers/geojson-layer";
 
 class Renderer extends RendererEvent {
   gl: WebGLRenderingContext;
   program: WebGLProgram;
   positionBuffer: WebGLBuffer;
-  layers: VectorLayer[] = [];
+  layers: (VectorLayer | GeoJSONLayer)[] = [];
   tilesInView: string[] = [];
   tilesToLoad: string[] = [];
 
@@ -102,31 +103,60 @@ class Renderer extends RendererEvent {
     this.gl.uniformMatrix3fv(matrixLocation, false, this.matrix);
 
     this.layers.forEach((layer) => {
-      this.tilesInView.forEach((tile) => {
-        const tileData = layer.tiles[tile];
-        (tileData || []).forEach((tileLayer) => {
-          const { layer, vertices } = tileLayer;
-          if (LAYERS[layer]) {
-            const color = LAYERS[layer].map(n => n / 255);
-            const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
-            this.gl.uniform4fv(colorLocation, color);
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-            const positionAttribLocation = this.gl.getAttribLocation(this.program, 'a_position');
-            this.gl.enableVertexAttribArray(positionAttribLocation);
-            const size = 3;
-            const type = this.gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            let offset = 0;
-            this.gl.vertexAttribPointer(positionAttribLocation, size, type, normalize, stride, offset);
-            const primitiveType = this.gl.TRIANGLES;
-            offset = 0;
-            const count = vertices.length / 3;
-            this.gl.drawArrays(primitiveType, offset, count);
-          }
+      if (layer instanceof VectorLayer) {
+        this.tilesInView.forEach((tile) => {
+          const tileData = layer.tiles[tile];
+          (tileData || []).forEach((tileLayer) => {
+            const { layer, vertices } = tileLayer;
+            if (LAYERS[layer]) {
+              const color = LAYERS[layer].map(n => n / 255);
+              const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
+              this.gl.uniform4fv(colorLocation, color);
+              this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+              this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
+              const positionAttribLocation = this.gl.getAttribLocation(this.program, 'a_position');
+              this.gl.enableVertexAttribArray(positionAttribLocation);
+              const size = 3;
+              const type = this.gl.FLOAT;
+              const normalize = false;
+              const stride = 0;
+              let offset = 0;
+              this.gl.vertexAttribPointer(positionAttribLocation, size, type, normalize, stride, offset);
+              const primitiveType = this.gl.TRIANGLES;
+              offset = 0;
+              const count = vertices.length / 3;
+              this.gl.drawArrays(primitiveType, offset, count);
+            }
+          })
         })
-      })
+      } else if (layer instanceof GeoJSONLayer) {
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        // geojson data
+        this.tilesInView.forEach((tile) => {
+          const vertices: any = layer.tiles[tile];
+          if (!vertices) return;
+          
+          const color = [1, 0, 0, 0.5];
+          const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
+          this.gl.uniform4fv(colorLocation, color);
+          this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+          this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
+          const positionAttribLocation = this.gl.getAttribLocation(this.program, 'a_position');
+          this.gl.enableVertexAttribArray(positionAttribLocation);
+          const size = 3;
+          const type = this.gl.FLOAT;
+          const normalize = false;
+          const stride = 0;
+          let offset = 0;
+          this.gl.vertexAttribPointer(positionAttribLocation, size, type, normalize, stride, offset);
+          const primitiveType = this.gl.TRIANGLES;
+          offset = 0;
+          const count = vertices.length / 3;
+          this.gl.drawArrays(primitiveType, offset, count);
+        })
+        this.gl.disable(this.gl.BLEND);
+      }
     })
     
     if (this.debug) {

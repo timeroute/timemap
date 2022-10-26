@@ -1,4 +1,6 @@
 /// <reference types="webpack/module" />
+/// <reference types="geojson" />
+/// <reference types="geojson-vt" />
 
 interface MapOptions {
   center?: [number, number];
@@ -17,12 +19,12 @@ interface VectorLayerProps {
   minZoom?: number;
 }
 
-
-interface LayerProps {
-  url: string;
-  tileSize?: number;
-  maxZoom?: number;
+interface GeoJSONLayerProps {
+  id: string;
+  type: string;
+  data: string | GeoJSON.GeoJSON;
   minZoom?: number;
+  maxZoom?: number;
 }
 
 interface CameraProps {

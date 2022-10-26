@@ -10,7 +10,7 @@ class VectorLayer {
   worker: Worker;
   tiles: Record<string, TileDataProps[]> = {};
 
-  constructor(id: string, props: LayerProps) {
+  constructor(id: string, props: VectorLayerProps) {
     this.id = id;
     this.url = props.url;
     if (props.tileSize !== undefined) {
@@ -23,8 +23,8 @@ class VectorLayer {
       this.maxZoom = props.maxZoom;
     }
     this.worker = new Worker(new URL('../workers/tile-worker.ts', import.meta.url));
-    this.worker.onmessage = this.workerMsg;
-    this.worker.onerror = this.workerErr;
+    this.worker.addEventListener('message', this.workerMsg);
+    this.worker.addEventListener('error', this.workerErr);
   }
 
   get maxzoom() {
@@ -58,7 +58,13 @@ class VectorLayer {
 
   workerErr = (error: ErrorEvent) => {
     console.error('Uncaught worker error.', error);
-    
+  }
+
+  destroy() {
+    this.tiles = {};
+    this.worker.removeEventListener('message', this.workerMsg);
+    this.worker.removeEventListener('error', this.workerErr);
+    this.worker.terminate();
   }
 }
 

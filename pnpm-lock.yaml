@@ -5,18 +5,21 @@ specifiers:
   '@mapbox/vector-tile': ^1.3.1
   '@types/earcut': ^2.1.1
   '@types/geojson': ^7946.0.10
+  '@types/geojson-vt': ^3.2.0
   '@types/mapbox__tilebelt': ^1.0.0
   '@types/mapbox__vector-tile': ^1.3.0
   '@types/pbf': ^3.0.2
   '@typescript-eslint/eslint-plugin': ^5.40.1
   axios: ^1.1.3
   earcut: ^2.2.4
+  geojson-vt: ^3.2.1
   gl-matrix: ^3.4.3
   html-webpack-plugin: ^5.5.0
   pbf: ^3.2.1
   raw-loader: ^4.0.2
   ts-loader: ^9.4.1
   typescript: ^4.8.4
+  vt-pbf: ^3.1.3
   webpack: ^5.74.0
   webpack-cli: ^4.10.0
   webpack-dev-server: ^4.11.1
@@ -26,12 +29,15 @@ dependencies:
   '@mapbox/vector-tile': 1.3.1
   axios: 1.1.3
   earcut: 2.2.4
+  geojson-vt: 3.2.1
   gl-matrix: 3.4.3
   pbf: 3.2.1
+  vt-pbf: 3.1.3
 
 devDependencies:
   '@types/earcut': 2.1.1
   '@types/geojson': 7946.0.10
+  '@types/geojson-vt': 3.2.0
   '@types/mapbox__tilebelt': 1.0.0
   '@types/mapbox__vector-tile': 1.3.0
   '@types/pbf': 3.0.2
@@ -190,6 +196,12 @@ packages:
       '@types/express-serve-static-core': 4.17.31
       '@types/qs': 6.9.7
       '@types/serve-static': 1.15.0
+    dev: true
+
+  /@types/geojson-vt/3.2.0:
+    resolution: {integrity: sha512-w3Suw6tXNOPZZROz7+cEkYF+ufVZKKfhKByxRFQwwm5BMyC1pflI9nEsiFQ1eQ27IiO1TEkxjvvcbyKW5YJJKA==}
+    dependencies:
+      '@types/geojson': 7946.0.10
     dev: true
 
   /@types/geojson/7946.0.10:
@@ -1313,6 +1325,10 @@ packages:
   /function-bind/1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
     dev: true
+
+  /geojson-vt/3.2.1:
+    resolution: {integrity: sha512-EvGQQi/zPrDA6zr6BnJD/YhwAkBP8nnJ9emh3EnHQKVMfg/MRVtPbMYdgVy/IaEmn4UfagD2a6fafPDL5hbtwg==}
+    dev: false
 
   /get-intrinsic/1.1.3:
     resolution: {integrity: sha512-QJVz1Tj7MS099PevUG5jvnt9tSkXN8K14dxQlikJuPt4uD9hHAHjLyLBiLR5zELelBdD9QNRAXZzsJx0WaDL9A==}
@@ -2562,6 +2578,14 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
     dev: true
+
+  /vt-pbf/3.1.3:
+    resolution: {integrity: sha512-2LzDFzt0mZKZ9IpVF2r69G9bXaP2Q2sArJCmcCgvfTdCCZzSyz4aCLoQyUilu37Ll56tCblIZrXFIjNUpGIlmA==}
+    dependencies:
+      '@mapbox/point-geometry': 0.1.0
+      '@mapbox/vector-tile': 1.3.1
+      pbf: 3.2.1
+    dev: false
 
   /watchpack/2.4.0:
     resolution: {integrity: sha512-Lcvm7MGST/4fup+ifyKi2hjyIAwcdI4HRgtvTpIUxBRhB+RFtUh8XtDOxUfctVCnhVi+QQj49i91OyvzkJl6cg==}
