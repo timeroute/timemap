@@ -130,12 +130,14 @@ class Renderer extends RendererEvent {
           })
         })
       } else if (layer instanceof GeoJSONLayer) {
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         // geojson data
         this.tilesInView.forEach((tile) => {
           const vertices: any = layer.tiles[tile];
           if (!vertices) return;
           
-          const color = [1, 0, 0, 1];
+          const color = [1, 0, 0, 0.5];
           const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
           this.gl.uniform4fv(colorLocation, color);
           this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
@@ -153,6 +155,7 @@ class Renderer extends RendererEvent {
           const count = vertices.length / 3;
           this.gl.drawArrays(primitiveType, offset, count);
         })
+        this.gl.disable(this.gl.BLEND);
       }
     })
     
