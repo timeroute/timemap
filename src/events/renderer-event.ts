@@ -75,8 +75,6 @@ class RendererEvent extends BaseEvent {
     this.camera.z = Math.max(MIN_ZOOM, Math.min(this.camera.z, MAX_ZOOM));
     this.updateMatrix();
 
-    console.log(this.atLimits())
-
     if (this.atLimits()) {
       this.camera.z = prevZoom;
       this.updateMatrix();
