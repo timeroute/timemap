@@ -7,7 +7,10 @@
 🏠 Has Features
 - Matrix transform. traslate, scale, rotate.
 - Load vector tile.
-
-🚧 Todo Features
 - Load geojson.
 - Load image tile.
+
+🚧 Todo Features
+- Optimize code
+- Load 3d models
+- Load terrain(if can)
