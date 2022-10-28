@@ -1,4 +1,6 @@
+import tilebelt from "@mapbox/tilebelt";
 import { fetchImageTile, fetchTile } from "../utils/map-util";
+import MercatorCoordinate from "../utils/mercator-coordinate";
 
 class ImageLayer {
   id: string;
@@ -7,7 +9,7 @@ class ImageLayer {
   minZoom: number = 0;
   maxZoom: number = 22;
   worker: Worker;
-  tiles: Record<string, TileDataProps[]> = {};
+  tiles: Record<string, ImageTileDataProps> = {};
 
   constructor(id: string, props: VectorLayerProps) {
     this.id = id;
@@ -35,18 +37,32 @@ class ImageLayer {
       if (this.tiles[tile]) {
         return;
       }
-      this.tiles[tile] = [];
-      try {
-        if (tilesInView.includes(tile)) {
-          const tileData = await fetchImageTile({ tile, url: this.url});
-          // this.tiles[tile] = tileData;
-        } else {
-          this.worker.postMessage({ tile, url: this.url });
+      const [x, y, z] = tile.split('/').map(Number);
+      
+      const [minlng, minlat, maxlng, maxlat] = tilebelt.tileToBBOX([x, y, z]);
+      
+      const [minx, miny] = MercatorCoordinate.fromLngLat([minlng, minlat]);
+      const [maxx, maxy] = MercatorCoordinate.fromLngLat([maxlng, maxlat]);
+      const image = new Image();
+      image.onload = () => {
+        this.tiles[tile] = {
+          vertices: new Float32Array([
+            minx, miny, 1, 0, 0,
+            maxx, miny, 1, 1, 0,
+            minx, maxy, 1, 0, 1,
+            minx, maxy, 1, 0, 1,
+            maxx, miny, 1, 1, 0,
+            maxx, maxy, 1, 1, 1
+          ]),
+          image,
         }
-      } catch (err) {
+      }
+      image.onerror = (err) => {
         console.warn(`Error loading tile ${tile}`, err);
         this.tiles[tile] = undefined;
       }
+      image.crossOrigin = 'Anonymous'
+      image.src = this.url.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y));
     })
   }
 

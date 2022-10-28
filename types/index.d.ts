@@ -19,6 +19,15 @@ interface VectorLayerProps {
   minZoom?: number;
 }
 
+interface ImageLayerProps {
+  id: string;
+  type: string;
+  url: string;
+  tileSize?: number;
+  maxZoom?: number;
+  minZoom?: number;
+}
+
 interface GeoJSONLayerProps {
   id: string;
   type: string;
@@ -42,6 +51,11 @@ interface TileWorkerMessageData {
   tile: string;
   layers: any;
   url: string;
+}
+
+interface ImageTileDataProps {
+  image: HTMLImageElement;
+  vertices: Float32Array;
 }
 
 interface TileDataProps {
