@@ -19,11 +19,27 @@
       height: 100%;
       width: 100%;
     }
+
+    .control {
+      position: absolute;
+      right: 0;
+      top: 0;
+      margin: 24px;
+      padding: 24px;
+      z-index: 10;
+      background-color: white;
+    }
   </style>
 </head>
 
 <body>
-  <canvas id="map"></div>
+  <canvas id="map"></canvas>
+  <div class="control">
+    <div><input type="checkbox" id="debug" /> 调试瓦片</div>
+    <div><input type="checkbox" id="vec" /> 加载矢量瓦片</div>
+    <div><input type="checkbox" id="img" /> 加载栅格瓦片</div>
+    <div><input type="checkbox" id="json" /> 加载GeoJSON</div>
+  </div>
 </body>
 <script type="module" src="./timemap.js"></script>
 <script type="module">
@@ -38,22 +54,48 @@
   const map = new Map(canvas, {
     center: [120, 30],
     zoom: 4,
-    debug: false
+    debug: false,
   });
-  map.addLayer({
-    id: 'vec',
-    type: 'vector',
-    url: 'https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=pk.eyJ1IjoiY2hpbmVzZWphciIsImEiOiJjanU5bXFpZ28wN3JtNGRwZGM5MW84czVsIn0.DhHUA_m4clzrzHFGtj97kQ',
-  });
-  map.addLayer({
-    id: 'geo',
-    type: 'geojson',
-    data: 'https://geojson.cn/api/data/110000.json'
-  });
-  console.log(map);
-  setTimeout(() => {
-    map.removeLayer('geo');
-  }, 5000);
+  function changeVector(e) {
+    if (e.target.checked) {
+      map.addLayer({
+        id: 'vec',
+        type: 'vector',
+        url: 'https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=pk.eyJ1IjoiY2hpbmVzZWphciIsImEiOiJjanU5bXFpZ28wN3JtNGRwZGM5MW84czVsIn0.DhHUA_m4clzrzHFGtj97kQ',
+      });
+    } else {
+      map.removeLayer('vec');
+    }
+  }
+  function changeImage(e) {
+    if (e.target.checked) {
+      map.addLayer({
+        id: 'img',
+        type: 'image',
+        url: 'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      })
+    } else {
+      map.removeLayer('img');
+    }
+  }
+  function changeGeojson(e) {
+    if (e.target.checked) {
+      map.addLayer({
+        id: 'geo',
+        type: 'geojson',
+        data: 'https://geojson.cn/api/data/110000.json'
+      });
+    } else {
+      map.removeLayer('geo');
+    }
+  }
+  function changeDebug(e) {
+    map.debug = e.target.checked;
+  }
+  document.getElementById('debug').addEventListener('change', changeDebug);
+  document.getElementById('vec').addEventListener('change', changeVector);
+  document.getElementById('img').addEventListener('change', changeImage);
+  document.getElementById('json').addEventListener('change', changeGeojson);
 </script>
 
 </html>
