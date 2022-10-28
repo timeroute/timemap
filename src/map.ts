@@ -1,4 +1,5 @@
 import GeoJSONLayer from './layers/geojson-layer';
+import ImageLayer from './layers/image-layer';
 import VectorLayer from './layers/vector-layer';
 import Renderer from './renderer';
 import MercatorCoordinate from './utils/mercator-coordinate';
@@ -26,7 +27,11 @@ class Map {
     });
   }
 
-  async addLayer(options: VectorLayerProps | GeoJSONLayerProps) {
+  set debug(flag: boolean) {
+    this.renderer.debug = flag;
+  }
+
+  async addLayer(options: VectorLayerProps | ImageLayerProps | GeoJSONLayerProps) {
     const {id, type} = options;
     if (type === 'vector') {
       this.renderer.layers.push(new VectorLayer(id, options as VectorLayerProps));
@@ -36,15 +41,17 @@ class Map {
         await layer.updateData();
       }
       this.renderer.layers.push(layer);
+    } else if (type === 'image') {
+      this.renderer.layers.push(new ImageLayer(id, options as ImageLayerProps));
     }
     this.renderer.updateTiles();
   }
 
   removeLayer(id: string) {
-    const layer = this.getLayer(id);
-    if (layer) {
-      layer.destroy();
-      this.removeLayer(id);
+    const index = this.renderer.layers.findIndex(layer => layer.id === id);
+    if (index > -1) {
+      this.renderer.layers[index].destroy();
+      this.renderer.layers.splice(index, 1);
     }
   }
 
