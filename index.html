@@ -56,35 +56,45 @@
     zoom: 4,
     debug: false,
   });
+  function addVectorLayer() {
+    map.addLayer({
+      id: 'vec',
+      type: 'vector',
+      url: 'https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=pk.eyJ1IjoiY2hpbmVzZWphciIsImEiOiJjanU5bXFpZ28wN3JtNGRwZGM5MW84czVsIn0.DhHUA_m4clzrzHFGtj97kQ',
+    });
+  }
   function changeVector(e) {
     if (e.target.checked) {
-      map.addLayer({
-        id: 'vec',
-        type: 'vector',
-        url: 'https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8/{z}/{x}/{y}.mvt?access_token=pk.eyJ1IjoiY2hpbmVzZWphciIsImEiOiJjanU5bXFpZ28wN3JtNGRwZGM5MW84czVsIn0.DhHUA_m4clzrzHFGtj97kQ',
-      });
+      addVectorLayer();
     } else {
       map.removeLayer('vec');
     }
   }
+  function addImageLayer() {
+    map.addLayer({
+      id: 'img',
+      type: 'image',
+      url: 'https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}',
+      // url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    })
+  }
   function changeImage(e) {
     if (e.target.checked) {
-      map.addLayer({
-        id: 'img',
-        type: 'image',
-        url: 'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
-      })
+      addImageLayer();
     } else {
       map.removeLayer('img');
     }
   }
+  function addGeojsonLayer() {
+    map.addLayer({
+      id: 'geo',
+      type: 'geojson',
+      data: 'https://geojson.cn/api/data/110000.json'
+    });
+  }
   function changeGeojson(e) {
     if (e.target.checked) {
-      map.addLayer({
-        id: 'geo',
-        type: 'geojson',
-        data: 'https://geojson.cn/api/data/110000.json'
-      });
+      addGeojsonLayer();
     } else {
       map.removeLayer('geo');
     }
@@ -96,6 +106,9 @@
   document.getElementById('vec').addEventListener('change', changeVector);
   document.getElementById('img').addEventListener('change', changeImage);
   document.getElementById('json').addEventListener('change', changeGeojson);
+
+  document.getElementById('img').checked = true;
+  addImageLayer();
 </script>
 
 </html>
