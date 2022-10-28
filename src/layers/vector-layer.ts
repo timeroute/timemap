@@ -4,7 +4,7 @@ import { fetchTile } from "../utils/map-util";
 class VectorLayer {
   id: string;
   url: string;
-  tileSize: number = 512;
+  tileSize: number = 256;
   minZoom: number = 0;
   maxZoom: number = 22;
   worker: Worker;
