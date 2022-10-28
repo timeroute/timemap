@@ -45,16 +45,6 @@ const getTileURL = ({ url, x, y, z }: TileUrlProps) => (
     .replace('{z}', String(z))
 );
 
-export const fetchImageTile = async ({ tile, url }: Partial<TileProps>) => {
-  const [x, y, z] = tile.split('/').map(Number);
-
-  const res = await axios.get(getTileURL({ url, x, y, z}), {
-    responseType: 'arraybuffer',
-  })
-
-  console.log(res);
-}
-
 export const fetchTile = async ({ tile, layers, url }: TileProps) => {
   const [x, y, z] = tile.split('/').map(Number);
 

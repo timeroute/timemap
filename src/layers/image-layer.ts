@@ -1,14 +1,12 @@
 import tilebelt from "@mapbox/tilebelt";
-import { fetchImageTile, fetchTile } from "../utils/map-util";
 import MercatorCoordinate from "../utils/mercator-coordinate";
 
 class ImageLayer {
   id: string;
   url: string;
-  tileSize: number = 512;
+  tileSize: number = 256;
   minZoom: number = 0;
   maxZoom: number = 22;
-  worker: Worker;
   tiles: Record<string, ImageTileDataProps> = {};
 
   constructor(id: string, props: VectorLayerProps) {
@@ -23,9 +21,6 @@ class ImageLayer {
     if (props.maxZoom > props.minZoom && props.maxZoom < 23) {
       this.maxZoom = props.maxZoom;
     }
-    this.worker = new Worker(new URL('../workers/tile-worker.ts', import.meta.url));
-    this.worker.addEventListener('message', this.workerMsg);
-    this.worker.addEventListener('error', this.workerErr);
   }
 
   get maxzoom() {
@@ -66,20 +61,8 @@ class ImageLayer {
     })
   }
 
-  workerMsg = (event: MessageEvent) => {
-    const {tile, tileData} = event.data;
-    this.tiles[tile] = tileData;
-  }
-
-  workerErr = (error: ErrorEvent) => {
-    console.error('Uncaught worker error.', error);
-  }
-
   destroy() {
     this.tiles = {};
-    this.worker.removeEventListener('message', this.workerMsg);
-    this.worker.removeEventListener('error', this.workerErr);
-    this.worker.terminate();
   }
 }
 
