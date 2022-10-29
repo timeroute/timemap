@@ -38,6 +38,7 @@
     <div><input type="checkbox" id="debug" /> 调试瓦片</div>
     <div><input type="checkbox" id="vec" /> 加载矢量瓦片</div>
     <div><input type="checkbox" id="img" /> 加载栅格瓦片</div>
+    <div><input type="checkbox" id="img-label" /> 加载标注栅格瓦片</div>
     <div><input type="checkbox" id="json" /> 加载GeoJSON</div>
   </div>
 </body>
@@ -78,11 +79,25 @@
       // url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
     })
   }
+  function addImageLabelLayer() {
+    map.addLayer({
+      id: 'img-label',
+      type: 'image',
+      url: 'https://wprd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=8&x={x}&y={y}&z={z}&scl=1&ltype=4'
+    })
+  }
   function changeImage(e) {
     if (e.target.checked) {
       addImageLayer();
     } else {
       map.removeLayer('img');
+    }
+  }
+  function changeImageLabel(e) {
+    if (e.target.checked) {
+      addImageLabelLayer();
+    } else {
+      map.removeLayer('img-label');
     }
   }
   function addGeojsonLayer() {
@@ -105,10 +120,13 @@
   document.getElementById('debug').addEventListener('change', changeDebug);
   document.getElementById('vec').addEventListener('change', changeVector);
   document.getElementById('img').addEventListener('change', changeImage);
+  document.getElementById('img-label').addEventListener('change', changeImageLabel);
   document.getElementById('json').addEventListener('change', changeGeojson);
 
   document.getElementById('img').checked = true;
+  document.getElementById('img-label').checked = true;
   addImageLayer();
+  addImageLabelLayer();
 </script>
 
 </html>
