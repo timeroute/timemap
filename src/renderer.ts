@@ -193,7 +193,8 @@ class Renderer extends RendererEvent {
           const vertices: any = layer.tiles[tile];
           if (!vertices) return;
           
-          const color = [1, 0, 0, 0.5];
+          const { color: rgb, opacity } = layer.style;
+          const color = [...rgb, opacity];
           const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
           this.gl.uniform4fv(colorLocation, color);
           this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);

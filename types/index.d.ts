@@ -34,6 +34,12 @@ interface GeoJSONLayerProps {
   data: string | GeoJSON.GeoJSON;
   minZoom?: number;
   maxZoom?: number;
+  style?: GeoJSONStyleProps;
+}
+
+interface GeoJSONStyleProps {
+  color?: [number, number, number];
+  opacity?: number;
 }
 
 interface CameraProps {

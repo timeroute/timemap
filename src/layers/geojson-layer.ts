@@ -2,7 +2,13 @@ import { VectorTile } from '@mapbox/vector-tile';
 import geojsonvt from 'geojson-vt';
 import Protobuf from 'pbf';
 import vtpbf from 'vt-pbf';
+import { hexToRGB } from '../utils/common';
 import { geometryToVertices } from '../utils/map-util';
+
+const defaultStyle: GeoJSONStyleProps = {
+  color: [0, 0, 0],
+  opacity: 1,
+}
 
 class GeoJSONLayer {
   id: string;
@@ -11,6 +17,7 @@ class GeoJSONLayer {
   minZoom: number = 0;
   maxZoom: number = 22;
   tiles: Record<string, Float32Array> = {};
+  style: GeoJSONStyleProps = defaultStyle;
 
   constructor(id: string, props: GeoJSONLayerProps) {
     this.id = id;
@@ -19,6 +26,9 @@ class GeoJSONLayer {
     }
     if (props.maxZoom > props.minZoom && props.maxZoom < 23) {
       this.maxZoom = props.maxZoom;
+    }
+    if (props.style) {
+      this.style = Object.assign(this.style, props.style);
     }
     if (typeof props.data === 'string') {
       this.url = props.data;
@@ -31,6 +41,21 @@ class GeoJSONLayer {
 
   get maxzoom() {
     return this.maxZoom;
+  }
+
+  set color(color: string | [number, number, number]) {
+    if (typeof color === 'string') {
+      this.style.color = hexToRGB(color);
+    } else {
+      this.style.color = color;
+    }
+  }
+
+  set opacity(opacity: number) {
+    if (opacity > 1 || opacity < 0) {
+      throw new Error("opacity must be set between 0 and 1");
+    }
+    this.style.opacity = opacity;
   }
 
   async updateData() {
