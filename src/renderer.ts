@@ -144,6 +144,8 @@ class Renderer extends RendererEvent {
       } else if (layer instanceof ImageLayer) {
         this.gl.useProgram(this.imageProgram);
         this.gl.uniformMatrix3fv(imageMatrixLocation, false, this.matrix);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         // image layer
         this.tilesInView.forEach((tile) => {
           if (!layer.tiles[tile]) return;
@@ -180,6 +182,7 @@ class Renderer extends RendererEvent {
           // layer.tiles[tile] = undefined;
           this.gl.deleteTexture(texture);
         })
+        this.gl.disable(this.gl.BLEND);
       } else if (layer instanceof GeoJSONLayer) {
         this.gl.useProgram(this.program);
         this.gl.uniformMatrix3fv(matrixLocation, false, this.matrix);
