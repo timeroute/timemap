@@ -1,3 +1,4 @@
+import greatCircle from '@turf/great-circle';
 import GeoJSONLayer from './layers/geojson-layer';
 import ImageLayer from './layers/image-layer';
 import VectorLayer from './layers/vector-layer';
@@ -29,6 +30,37 @@ class Map {
 
   set debug(flag: boolean) {
     this.renderer.debug = flag;
+  }
+
+  set center(center: [number, number]) {
+    const [x, y] = MercatorCoordinate.fromLngLat(center);
+    this.renderer.camera = {
+      x, y, z: this.renderer.camera.z
+    }
+    this.renderer.updateMatrix();
+    this.renderer.updateTiles();
+  }
+
+  get center() {
+    const {x, y} = this.renderer.camera;
+    return MercatorCoordinate.fromXY([x, y]);
+  }
+
+  flyTo(destination: [number, number]) {
+    const line = greatCircle(this.center, destination, { npoints: 1000 });
+    const coordinates = line.geometry.coordinates;
+    let startTime = Date.now();
+    const animate = () => {
+      let diffTime = Date.now() - startTime;
+      if (diffTime >= 1000) {
+        this.center = destination;
+        return;
+      } else {
+        this.center = coordinates[diffTime] as [number, number];
+      }
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
   }
 
   async addLayer(options: VectorLayerProps | ImageLayerProps | GeoJSONLayerProps) {

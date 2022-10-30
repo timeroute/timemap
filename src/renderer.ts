@@ -104,7 +104,7 @@ class Renderer extends RendererEvent {
   }
 
   render = () => {
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.layers.forEach((layer) => {
       if (layer instanceof VectorLayer) {
         renderVectorLayer(this.gl, this.vecProgram, this.matrix, this.tilesInView, layer);
