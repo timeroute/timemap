@@ -26,7 +26,7 @@ class MercatorCoordinate {
     return 360 / Math.PI * Math.atan(Math.exp(y2 * Math.PI / 180)) - 90;
   }
 
-  static fromXY(xy: [number, number]) {
+  static fromXY(xy: [number, number]): [number, number] {
     let [x, y] = xy;
     const lng = MercatorCoordinate.lngFromMercatorX((1 + x) / 2);
     const lat = MercatorCoordinate.latFromMercatorY((1 - y) / 2);

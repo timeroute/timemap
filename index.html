@@ -40,6 +40,7 @@
     <div><input type="checkbox" id="img" /> 加载栅格瓦片</div>
     <div><input type="checkbox" id="img-label" /> 加载标注栅格瓦片</div>
     <div><input type="checkbox" id="json" /> 加载GeoJSON</div>
+    <div><button id="fly">飞行任一点</button></div>
   </div>
 </body>
 <script type="module" src="./timemap.js"></script>
@@ -124,11 +125,17 @@
   function changeDebug(e) {
     map.debug = e.target.checked;
   }
+  function handleFly() {
+    const dest = [80 + Math.random() * 20, 30 + Math.random() * 30];
+    console.log('center', map.center, 'fly to', dest);
+    map.flyTo(dest)
+  }
   document.getElementById('debug').addEventListener('change', changeDebug);
   document.getElementById('vec').addEventListener('change', changeVector);
   document.getElementById('img').addEventListener('change', changeImage);
   document.getElementById('img-label').addEventListener('change', changeImageLabel);
   document.getElementById('json').addEventListener('change', changeGeojson);
+  document.getElementById('fly').addEventListener('click', handleFly);
 
   document.getElementById('img').checked = true;
   document.getElementById('img-label').checked = true;

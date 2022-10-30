@@ -29,7 +29,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: 'timemap.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
     publicPath: '',
@@ -37,5 +37,7 @@ module.exports = {
   },
   optimization: {
     minimize: true,
+    usedExports: true,
+    runtimeChunk: true,
   }
 };
