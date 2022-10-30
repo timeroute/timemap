@@ -1,22 +1,20 @@
-import { LAYERS, MAX_ZOOM, TILE_BUFFER, TILE_SIZE } from "./constants";
+import { MAX_ZOOM, TILE_BUFFER, TILE_SIZE } from "./constants";
 import RendererEvent from "./events/renderer-event";
 import VectorLayer from "./layers/vector-layer";
-import { createProgram, createShader } from "./utils/webgl-util";
+import { createProgram, createShader, renderDebugLayer, renderGeoJSONLayer, renderImageLayer, renderVectorLayer } from "./utils/webgl-util";
 import vs from './shaders/vs.glsl';
 import fs from './shaders/fs.glsl';
 import imageVS from './shaders/image-vs.glsl';
 import imageFS from './shaders/image-fs.glsl';
 import { mat3 } from "gl-matrix";
 import tilebelt from "@mapbox/tilebelt";
-import { geometryToVertices } from "./utils/map-util";
 import GeoJSONLayer from "./layers/geojson-layer";
 import ImageLayer from "./layers/image-layer";
 
 class Renderer extends RendererEvent {
   gl: WebGLRenderingContext;
-  program: WebGLProgram;
-  imageProgram: WebGLProgram;
-  positionBuffer: WebGLBuffer;
+  vecProgram: WebGLProgram;
+  imgProgram: WebGLProgram;
   layers: (VectorLayer | ImageLayer | GeoJSONLayer)[] = [];
   tilesInView: string[] = [];
   tilesToLoad: string[] = [];
@@ -41,11 +39,9 @@ class Renderer extends RendererEvent {
   
   initGL() {
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-    this.program = this.initProgram(vs, fs);
-    this.imageProgram = this.initProgram(imageVS, imageFS);
-    this.gl.useProgram(this.program);
+    this.vecProgram = this.initProgram(vs, fs);
+    this.imgProgram = this.initProgram(imageVS, imageFS);
     this.gl.clearColor(0, 0, 0, 0);
-    this.positionBuffer = this.gl.createBuffer();
   }
 
   updateMatrix() {
@@ -108,137 +104,19 @@ class Renderer extends RendererEvent {
   }
 
   render = () => {
-    const matrixLocation = this.gl.getUniformLocation(this.program, "u_matrix");
-    const imageMatrixLocation = this.gl.getUniformLocation(this.imageProgram, "u_matrix");
-    
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.layers.forEach((layer) => {
       if (layer instanceof VectorLayer) {
-        this.gl.useProgram(this.program);
-        this.gl.uniformMatrix3fv(matrixLocation, false, this.matrix);
-        this.tilesInView.forEach((tile) => {
-          const tileData = layer.tiles[tile];
-          (tileData || []).forEach((tileLayer) => {
-            const { layer, vertices } = tileLayer;
-            if (LAYERS[layer]) {
-              const color = LAYERS[layer].map(n => n / 255);
-              const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
-              this.gl.uniform4fv(colorLocation, color);
-              this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-              this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-              const positionAttribLocation = this.gl.getAttribLocation(this.program, 'a_position');
-              this.gl.enableVertexAttribArray(positionAttribLocation);
-              const size = 3;
-              const type = this.gl.FLOAT;
-              const normalize = false;
-              const stride = 0;
-              let offset = 0;
-              this.gl.vertexAttribPointer(positionAttribLocation, size, type, normalize, stride, offset);
-              const primitiveType = this.gl.TRIANGLES;
-              offset = 0;
-              const count = vertices.length / 3;
-              this.gl.drawArrays(primitiveType, offset, count);
-            }
-          })
-        })
+        renderVectorLayer(this.gl, this.vecProgram, this.matrix, this.tilesInView, layer);
       } else if (layer instanceof ImageLayer) {
-        this.gl.useProgram(this.imageProgram);
-        this.gl.uniformMatrix3fv(imageMatrixLocation, false, this.matrix);
-        this.gl.enable(this.gl.BLEND);
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-        // image layer
-        this.tilesInView.forEach((tile) => {
-          if (!layer.tiles[tile]) return;
-          const { image, vertices } = layer.tiles[tile];
-          
-          const texture = this.gl.createTexture();
-          this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-          
-          this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-          this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-          this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-          this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-          this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1)
-          this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
-          
-          this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-          this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-          const positionAttribLocation = this.gl.getAttribLocation(this.imageProgram, 'a_position');
-          this.gl.enableVertexAttribArray(positionAttribLocation);
-          const size = 5;
-          const type = this.gl.FLOAT;
-          const normalize = false;
-          const stride = size * 4;
-          let offset = 0;
-          this.gl.vertexAttribPointer(positionAttribLocation, 3, type, normalize, stride, offset);
-          const uvAttribLocation = this.gl.getAttribLocation(this.imageProgram, 'a_uv');
-          this.gl.enableVertexAttribArray(uvAttribLocation);
-          offset = 3;
-          this.gl.vertexAttribPointer(uvAttribLocation, 2, type, normalize, stride, offset*4);
-          const primitiveType = this.gl.TRIANGLES;
-          offset = 0;
-          const count = vertices.length / size;
-          this.gl.drawArrays(primitiveType, offset, count);
-          // layer.tiles[tile] = undefined;
-          this.gl.deleteTexture(texture);
-        })
-        this.gl.disable(this.gl.BLEND);
+        renderImageLayer(this.gl, this.imgProgram, this.matrix, this.tilesInView, layer);
       } else if (layer instanceof GeoJSONLayer) {
-        this.gl.useProgram(this.program);
-        this.gl.uniformMatrix3fv(matrixLocation, false, this.matrix);
-        this.gl.enable(this.gl.BLEND);
-        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-        // geojson data
-        this.tilesInView.forEach((tile) => {
-          const vertices: any = layer.tiles[tile];
-          if (!vertices) return;
-          
-          const { color: rgb, opacity } = layer.style;
-          const color = [...rgb, opacity];
-          const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
-          this.gl.uniform4fv(colorLocation, color);
-          this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-          this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-          const positionAttribLocation = this.gl.getAttribLocation(this.program, 'a_position');
-          this.gl.enableVertexAttribArray(positionAttribLocation);
-          const size = 3;
-          const type = this.gl.FLOAT;
-          const normalize = false;
-          const stride = 0;
-          let offset = 0;
-          this.gl.vertexAttribPointer(positionAttribLocation, size, type, normalize, stride, offset);
-          const primitiveType = this.gl.TRIANGLES;
-          offset = 0;
-          const count = vertices.length / 3;
-          this.gl.drawArrays(primitiveType, offset, count);
-        })
-        this.gl.disable(this.gl.BLEND);
+        renderGeoJSONLayer(this.gl, this.vecProgram, this.matrix, this.tilesInView, layer);
       }
     })
     
     if (this.debug) {
-      this.gl.useProgram(this.program);
-      this.gl.uniformMatrix3fv(matrixLocation, false, this.matrix);
-      this.tilesInView.forEach((tile) => {
-        const tileArray = tile.split('/').map(Number);
-        const colorLocation = this.gl.getUniformLocation(this.program, 'u_color');
-        this.gl.uniform4fv(colorLocation, [1, 0, 0, 1]);
-        const tileVertices = geometryToVertices(tilebelt.tileToGeoJSON(tileArray));
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, tileVertices, this.gl.STATIC_DRAW);
-        const positionAttribLocation = this.gl.getAttribLocation(this.program, 'a_position');
-        this.gl.enableVertexAttribArray(positionAttribLocation);
-        const size = 3;
-        const type = this.gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        let offset = 0;
-        this.gl.vertexAttribPointer(positionAttribLocation, size, type, normalize, stride, offset);
-        const primitiveType = this.gl.LINES;
-        offset = 0;
-        const count = tileVertices.length / 3;
-        this.gl.drawArrays(primitiveType, offset, count);
-      })
+      renderDebugLayer(this.gl, this.vecProgram, this.matrix, this.tilesInView);
     }
     
     requestAnimationFrame(this.render)

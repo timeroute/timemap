@@ -35,4 +35,7 @@ module.exports = {
     publicPath: '',
     library: 'timemap'
   },
+  optimization: {
+    minimize: true,
+  }
 };
