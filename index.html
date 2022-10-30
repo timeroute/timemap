@@ -106,6 +106,13 @@
       type: 'geojson',
       data: 'https://geojson.cn/api/data/110000.json'
     });
+    let colors = ['#ff0000', '#ffff00', '#00ff00', '#0000ff', '#00ffff', '#ff00ff', '#000000'];
+    setInterval(() => {
+      const layer = map.getLayer('geo');
+      if (!layer) return;
+      layer.opacity = Math.random();
+      layer.color = colors[Math.floor(Math.random() * colors.length)];
+    }, 1000);
   }
   function changeGeojson(e) {
     if (e.target.checked) {
