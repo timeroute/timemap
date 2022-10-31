@@ -13,9 +13,19 @@ class BaseEvent {
 
   mousedown = (e: MouseEvent) => {}
 
+  mousedbclick = (e: MouseEvent) => {}
+
   mouseup = (e: MouseEvent) => {}
 
   mousezoom = (e: MouseEvent) => {}
+
+  touchstart = (e: TouchEvent) => {}
+
+  touchdbstart = (e: TouchEvent) => {}
+
+  touchmove = (e: TouchEvent) => {}
+
+  touchend = (e: TouchEvent) => {}
 }
 
 export default BaseEvent;

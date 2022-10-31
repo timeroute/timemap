@@ -9,6 +9,7 @@ class RendererEvent extends BaseEvent {
   startY: number;
   matrix: mat3 = mat3.create();
   camera: CameraProps;
+  mousecache: number;
 
   constructor(canvas: HTMLCanvasElement, options: RendererProps) {
     super(canvas);
@@ -16,6 +17,7 @@ class RendererEvent extends BaseEvent {
     this.camera = camera;
     this.debug = debug;
     this.canvas.addEventListener('mousedown', this.mousedown);
+    this.canvas.addEventListener('touchstart', this.touchstart);
     this.canvas.addEventListener('wheel', this.mousezoom);
   }
 
@@ -47,7 +49,43 @@ class RendererEvent extends BaseEvent {
     this.updateTiles();
   }
 
+  touchmove = (e: TouchEvent) => {
+    e.preventDefault();
+    const [x, y] = this.getClipSpacePosition(e);
+    
+    const [preX, preY] = vec3.transformMat3(vec3.create(), [this.startX, this.startY, 0], mat3.invert(mat3.create(), this.matrix));
+    const [postX, postY] = vec3.transformMat3(vec3.create(), [x, y, 0], mat3.invert(mat3.create(), this.matrix));
+    
+    const deltaX = preX - postX;
+    const deltaY = preY - postY;
+    
+    if (isNaN(deltaX) || isNaN(deltaY)) {
+      return;
+    }
+    this.camera.x += deltaX;
+    this.camera.y += deltaY;
+    this.updateMatrix();
+    if (this.atLimits()) {
+      this.camera.x -= deltaX;
+      this.camera.y -= deltaY;
+      this.updateMatrix();
+      return;
+    }
+    this.startX = x;
+    this.startY = y;
+
+    this.updateMatrix();
+    this.updateTiles();
+  }
+
   mousedown = (e: MouseEvent) => {
+    if (this.mousecache) {
+      if (Date.now() - this.mousecache < 400) {
+        this.mousedbclick(e);
+        return;
+      }
+    }
+    this.mousecache = Date.now();
     const [startX, startY] = this.getClipSpacePosition(e);
     
     this.startX = startX;
@@ -57,6 +95,24 @@ class RendererEvent extends BaseEvent {
     this.canvas.addEventListener('mousemove', this.mousemove);
     this.canvas.addEventListener('mouseup', this.mouseup);
   }
+  
+  touchstart = (e: TouchEvent) => {
+    e.preventDefault();
+    if (this.mousecache) {
+      if (Date.now() - this.mousecache < 400) {
+        this.touchdbstart(e);
+        return;
+      }
+    }
+    this.mousecache = Date.now();
+    const [startX, startY] = this.getClipSpacePosition(e);
+    
+    this.startX = startX;
+    this.startY = startY;
+    
+    this.canvas.addEventListener('touchmove', this.touchmove);
+    this.canvas.addEventListener('touchend', this.touchend);
+  }
 
   mouseup = (e: MouseEvent) => {
     this.canvas.style.cursor = 'grab';
@@ -64,23 +120,27 @@ class RendererEvent extends BaseEvent {
     this.canvas.removeEventListener('mouseup', this.mouseup);
   }
 
-  mousezoom = (e: WheelEvent) => {
+  touchend = (e: TouchEvent) => {
     e.preventDefault();
+    this.canvas.removeEventListener('touchmove', this.touchmove);
+    this.canvas.removeEventListener('touchend', this.touchend);
+  }
+
+  handleZoom(e: MouseEvent | WheelEvent | TouchEvent, zoomDelta: number) {
     const [x, y] = this.getClipSpacePosition(e);
     const [preZoomX, preZoomY] = vec3.transformMat3(vec3.create(), [x, y, 0], mat3.invert(mat3.create(), this.matrix));
     
     const prevZoom = this.camera.z;
-    const zoomDelta = -e.deltaY * (1 / 500);
     this.camera.z += zoomDelta;
     this.camera.z = Math.max(MIN_ZOOM, Math.min(this.camera.z, MAX_ZOOM));
     this.updateMatrix();
-
+  
     if (this.atLimits()) {
       this.camera.z = prevZoom;
       this.updateMatrix();
       return;
     }
-
+  
     const [postZoomX, postZoomY] = vec3.transformMat3(vec3.create(), [x, y, 0], mat3.invert(mat3.create(), this.matrix));
     this.camera.x += preZoomX - postZoomX;
     this.camera.y += preZoomY - postZoomY;
@@ -88,8 +148,47 @@ class RendererEvent extends BaseEvent {
     this.updateTiles();
   }
 
-  getClipSpacePosition(e: MouseEvent | WheelEvent) {
-    const [x, y] = [e.clientX, e.clientY];
+  mousezoom = (e: WheelEvent) => {
+    this.handleZoom(e, -e.deltaY * (1 / 500));
+  }
+
+  mousedbclick = (e: MouseEvent) => {
+    const startTime = Date.now();
+    let curTime = startTime;
+    const animate = () => {
+      let tempTime = Date.now();
+      const deltaTime = tempTime - curTime;
+      const diffTime = tempTime - startTime;
+      curTime = tempTime;
+      if (diffTime > 300) return;
+      this.handleZoom(e, deltaTime / 300);
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  }
+
+  touchdbstart = (e: TouchEvent) => {
+    const startTime = Date.now();
+    let curTime = startTime;
+    const animte = () => {
+      let tempTime = Date.now();
+      const deltaTime = tempTime - curTime;
+      const diffTime = tempTime - startTime;
+      curTime = tempTime;
+      if (diffTime > 300) return;
+      this.handleZoom(e, deltaTime / 300);
+      requestAnimationFrame(animte);
+    }
+    requestAnimationFrame(animte);
+  }
+
+  getClipSpacePosition(e: MouseEvent | WheelEvent | TouchEvent) {
+    let x, y;
+    if (e instanceof MouseEvent || e instanceof WheelEvent) {
+      [x, y] = [e.clientX, e.clientY];
+    } else if (e instanceof TouchEvent) {
+      [x, y] = [e.targetTouches[0].pageX, e.targetTouches[0].pageY];
+    }
     const rect = this.canvas.getBoundingClientRect();
     const cssX = x - rect.left;
     const cssY = y - rect.top;
