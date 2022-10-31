@@ -63,32 +63,16 @@ class Map {
     requestAnimationFrame(animate);
   }
 
-  async addLayer(options: VectorLayerProps | ImageLayerProps | GeoJSONLayerProps) {
-    const {id, type} = options;
-    if (type === 'vector') {
-      this.renderer.layers.push(new VectorLayer(id, options as VectorLayerProps));
-    } else if (type === 'geojson') {
-      const layer = new GeoJSONLayer(id, options as GeoJSONLayerProps);
-      if (!layer.data) {
-        await layer.updateData();
-      }
-      this.renderer.layers.push(layer);
-    } else if (type === 'image') {
-      this.renderer.layers.push(new ImageLayer(id, options as ImageLayerProps));
-    }
-    this.renderer.updateTiles();
+  addLayer(options: VectorLayerProps | ImageLayerProps | GeoJSONLayerProps) {
+    this.renderer.addLayer(options);
   }
 
   removeLayer(id: string) {
-    const index = this.renderer.layers.findIndex(layer => layer.id === id);
-    if (index > -1) {
-      this.renderer.layers[index].destroy();
-      this.renderer.layers.splice(index, 1);
-    }
+    this.renderer.removeLayer(id);
   }
 
   getLayer(id: string) {
-    return this.renderer.layers.find(layer => layer.id === id);
+    return this.renderer.getLayer(id);
   }
 
   getBounds() {
