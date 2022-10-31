@@ -44,6 +44,39 @@ class Renderer extends RendererEvent {
     this.gl.clearColor(0, 0, 0, 0);
   }
 
+  getLayer(id: string) {
+    return this.layers.find(layer => layer.id === id);
+  }
+
+  removeLayer(id: string) {
+    const index = this.layers.findIndex(layer => layer.id === id);
+    if (index > -1) {
+      this.layers[index].destroy();
+      this.layers.splice(index, 1);
+    }
+  }
+
+  dataLoaded = () => {
+    this.updateTiles();
+  }
+
+  addLayer(options: VectorLayerProps | GeoJSONLayerProps | ImageLayerProps) {
+    const {id, type} = options;
+    if (type === 'vector') {
+      this.layers.push(new VectorLayer(id, options as VectorLayerProps));
+      this.updateTiles();
+    } else if (type === 'geojson') {
+      const layer = new GeoJSONLayer(id, options as GeoJSONLayerProps);
+      if (!layer.data) {
+        layer.updateData(this.dataLoaded);
+      }
+      this.layers.push(layer);
+    } else if (type === 'image') {
+      this.layers.push(new ImageLayer(id, options as ImageLayerProps));
+      this.updateTiles();
+    }
+  }
+
   updateMatrix() {
     const cameraMat = mat3.create();
     mat3.translate(cameraMat, cameraMat, [this.camera.x, this.camera.y]);

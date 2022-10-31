@@ -58,13 +58,14 @@ class GeoJSONLayer {
     this.style.opacity = opacity;
   }
 
-  async updateData() {
-    const res = await fetch(this.url);
-    const data = await res.json();
-    this.data = geojsonvt(data, {
-      maxZoom: this.maxZoom,
-      buffer: 0
-    });
+  updateData(callback: Function) {
+    fetch(this.url).then(res => res.json()).then(data => {
+      this.data = geojsonvt(data, {
+        maxZoom: this.maxZoom,
+        buffer: 0
+      });
+      return callback();
+    })
   }
 
   updateTiles(tilesInView: string[], tilesToLoad: string[]) {
