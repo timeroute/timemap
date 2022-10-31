@@ -65,12 +65,14 @@ class RendererEvent extends BaseEvent {
     this.camera.x += deltaX;
     this.camera.y += deltaY;
     this.updateMatrix();
+
     if (this.atLimits()) {
       this.camera.x -= deltaX;
       this.camera.y -= deltaY;
       this.updateMatrix();
       return;
     }
+
     this.startX = x;
     this.startY = y;
 
