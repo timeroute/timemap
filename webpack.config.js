@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: "production",
+  mode: "development",
   entry: './src/index.ts',
   devServer: {
     static: './dist'
@@ -29,15 +29,10 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: '[name].js',
+    filename: 'timemap.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
     publicPath: '',
     library: 'timemap'
   },
-  optimization: {
-    minimize: true,
-    usedExports: true,
-    runtimeChunk: true,
-  }
 };
