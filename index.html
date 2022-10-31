@@ -54,9 +54,10 @@
 
   const map = new Map(canvas, {
     center: [120, 30],
-    zoom: 4,
+    zoom: 8,
     debug: false,
   });
+  console.log(map);
   function addVectorLayer() {
     map.addLayer({
       id: 'vec',
