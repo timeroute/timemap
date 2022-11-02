@@ -1,7 +1,6 @@
-import axios from 'axios';
 import earcut from 'earcut';
 import Protobuf from 'pbf';
-import { VectorTile } from '@mapbox/vector-tile';
+import { VectorTile, VectorTileFeature } from '@mapbox/vector-tile';
 import MercatorCoordinate from './mercator-coordinate';
 
 export const geometryToVertices = (geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon) => {
@@ -48,11 +47,10 @@ const getTileURL = ({ url, x, y, z }: TileUrlProps) => (
 export const fetchTile = async ({ tile, layers, url }: TileProps) => {
   const [x, y, z] = tile.split('/').map(Number);
 
-  const res = await axios.get(getTileURL({ url, x, y, z }), {
-    responseType: 'arraybuffer',
-  });
+  const res = await fetch(getTileURL({ url, x, y, z }));
+  const data = await res.arrayBuffer();
 
-  const pbf = new Protobuf(res.data);
+  const pbf = new Protobuf(data);
   const vectorTile = new VectorTile(pbf);
 
   const tileData: TileDataProps[] = [] // layers -> features
