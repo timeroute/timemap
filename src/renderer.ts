@@ -22,8 +22,8 @@ class Renderer extends RendererEvent {
   constructor(canvas: HTMLCanvasElement, options: RendererProps) {
     super(canvas, options);
     this.gl = this.canvas.getContext('webgl');
-    this.gl.canvas.width = this.canvas.clientWidth;
-    this.gl.canvas.height = this.canvas.clientHeight;
+    window.addEventListener('resize', this.resize);
+    this.resize();
     this.initGL();
     this.updateMatrix();
     this.updateTiles();
@@ -38,10 +38,18 @@ class Renderer extends RendererEvent {
   }
   
   initGL() {
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.vecProgram = this.initProgram(vs, fs);
     this.imgProgram = this.initProgram(imageVS, imageFS);
     this.gl.clearColor(0, 0, 0, 0);
+  }
+
+  resize = () => {
+    console.log('resize');
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    this.canvas.width = this.canvas.clientWidth;
+    this.canvas.height = this.canvas.clientHeight;
+    this.updateMatrix();
+    this.updateTiles();
   }
 
   getLayer(id: string) {

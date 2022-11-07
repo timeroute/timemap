@@ -21,6 +21,8 @@ class RendererEvent extends BaseEvent {
     this.canvas.addEventListener('wheel', this.mousezoom);
   }
 
+  resize = () => {}
+
   mousemove = (e: MouseEvent) => {
     const [x, y] = this.getClipSpacePosition(e);
     
@@ -81,6 +83,7 @@ class RendererEvent extends BaseEvent {
   }
 
   mousedown = (e: MouseEvent) => {
+    e.preventDefault();
     if (this.mousecache) {
       if (Date.now() - this.mousecache < 400) {
         this.mousedbclick(e);
@@ -117,6 +120,7 @@ class RendererEvent extends BaseEvent {
   }
 
   mouseup = (e: MouseEvent) => {
+    e.preventDefault();
     this.canvas.style.cursor = 'grab';
     this.canvas.removeEventListener('mousemove', this.mousemove);
     this.canvas.removeEventListener('mouseup', this.mouseup);
@@ -129,6 +133,7 @@ class RendererEvent extends BaseEvent {
   }
 
   handleZoom(e: MouseEvent | WheelEvent | TouchEvent, zoomDelta: number) {
+    e.preventDefault();
     const [x, y] = this.getClipSpacePosition(e);
     const [preZoomX, preZoomY] = vec3.transformMat3(vec3.create(), [x, y, 0], mat3.invert(mat3.create(), this.matrix));
     
@@ -155,6 +160,7 @@ class RendererEvent extends BaseEvent {
   }
 
   mousedbclick = (e: MouseEvent) => {
+    e.preventDefault();
     const startTime = Date.now();
     let curTime = startTime;
     const animate = () => {
@@ -170,6 +176,7 @@ class RendererEvent extends BaseEvent {
   }
 
   touchdbstart = (e: TouchEvent) => {
+    e.preventDefault();
     const startTime = Date.now();
     let curTime = startTime;
     const animte = () => {
