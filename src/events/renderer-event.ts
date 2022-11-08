@@ -235,9 +235,9 @@ class RendererEvent extends BaseEvent {
     y2 = y2 / zoomScale / TILE_SIZE;
 
     const bbox = [
-      Math.max(MercatorCoordinate.lngFromMercatorX(x1), -180),
+      Math.max(MercatorCoordinate.lngFromMercatorX(x1), -179.5),
       Math.max(MercatorCoordinate.latFromMercatorY(y1), -85.05),
-      Math.min(MercatorCoordinate.lngFromMercatorX(x2), 180),
+      Math.min(MercatorCoordinate.lngFromMercatorX(x2), 179.5),
       Math.min(MercatorCoordinate.latFromMercatorY(y2), 85.05),
     ]
     
@@ -245,8 +245,9 @@ class RendererEvent extends BaseEvent {
   }
 
   atLimits() {
-    const bbox = this.calcBounds();
-    return bbox[0] === -180 || bbox[1] === -85.05 || bbox[2] === 180 || bbox[3] === 85.05;
+    return false;
+    // const bbox = this.calcBounds();
+    // return bbox[0] === -180 || bbox[1] === -85.05 || bbox[2] === 180 || bbox[3] === 85.05;
   }
 }
 
