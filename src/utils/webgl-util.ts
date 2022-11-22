@@ -88,22 +88,20 @@ export const renderImageLayer = (
   gl.uniformMatrix3fv(matrixLocation, false, matrix);
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  const positionBuffer = gl.createBuffer();
   // image layer
-  tilesInView.forEach((tile) => {
-    if (!layer.tiles[tile]) return;
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  tilesInView.filter(tile => layer.tiles[tile]).forEach((tile) => {
     const { image, vertices } = layer.tiles[tile];
     
-    const texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+    // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     
-    const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
     const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
@@ -125,11 +123,11 @@ export const renderImageLayer = (
     const count = vertices.length / size;
     gl.drawArrays(primitiveType, offset, count);
 
-    gl.deleteBuffer(positionBuffer);
-    gl.deleteTexture(texture);
     gl.disableVertexAttribArray(positionAttribLocation);
     gl.disableVertexAttribArray(uvAttribLocation);
   })
+  gl.deleteTexture(texture);
+  gl.deleteBuffer(positionBuffer);
   gl.disable(gl.BLEND);
 }
 
@@ -143,8 +141,8 @@ export const renderGeoJSONLayer = (
   gl.useProgram(program);
   const matrixLocation = gl.getUniformLocation(program, 'u_matrix');
   gl.uniformMatrix3fv(matrixLocation, false, matrix);
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  // gl.enable(gl.BLEND);
+  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   // geojson data
   tilesInView.forEach((tile) => {
     const vertices: any = layer.tiles[tile];
@@ -173,7 +171,7 @@ export const renderGeoJSONLayer = (
     gl.deleteBuffer(positionBuffer);
     gl.disableVertexAttribArray(positionAttribLocation);
   })
-  gl.disable(gl.BLEND);
+  // gl.disable(gl.BLEND);
 }
 
 export const renderDebugLayer = (

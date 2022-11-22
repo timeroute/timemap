@@ -21,7 +21,7 @@ class Renderer extends RendererEvent {
 
   constructor(canvas: HTMLCanvasElement, options: RendererProps) {
     super(canvas, options);
-    this.gl = this.canvas.getContext('webgl', { antialias: true });
+    this.gl = this.canvas.getContext('webgl');
     window.addEventListener('resize', this.resize);
     this.resize();
     this.initGL();
@@ -44,14 +44,14 @@ class Renderer extends RendererEvent {
   }
 
   resize = () => {
-    console.log('resize');
     let w = this.canvas.clientWidth;
     let h = this.canvas.clientHeight;
+    
     if (window.devicePixelRatio) {
       this.canvas.width = w * window.devicePixelRatio;
       this.canvas.height = h * window.devicePixelRatio;
     }
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     this.updateMatrix();
     this.updateTiles();
   }
