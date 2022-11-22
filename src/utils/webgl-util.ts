@@ -143,8 +143,8 @@ export const renderGeoJSONLayer = (
   gl.useProgram(program);
   const matrixLocation = gl.getUniformLocation(program, 'u_matrix');
   gl.uniformMatrix3fv(matrixLocation, false, matrix);
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  // gl.enable(gl.BLEND);
+  // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   // geojson data
   tilesInView.forEach((tile) => {
     const vertices: any = layer.tiles[tile];
@@ -173,7 +173,7 @@ export const renderGeoJSONLayer = (
     gl.deleteBuffer(positionBuffer);
     gl.disableVertexAttribArray(positionAttribLocation);
   })
-  gl.disable(gl.BLEND);
+  // gl.disable(gl.BLEND);
 }
 
 export const renderDebugLayer = (
