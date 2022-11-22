@@ -40,17 +40,21 @@ class ImageLayer {
       const [maxx, maxy] = MercatorCoordinate.fromLngLat([maxlng, maxlat]);
       const image = new Image();
       image.onload = () => {
-        this.tiles[tile] = {
-          vertices: new Float32Array([
-            minx, miny, 1, 0, 0,
-            maxx, miny, 1, 1, 0,
-            minx, maxy, 1, 0, 1,
-            minx, maxy, 1, 0, 1,
-            maxx, miny, 1, 1, 0,
-            maxx, maxy, 1, 1, 1
-          ]),
-          image,
-        }
+        createImageBitmap(image, {
+          imageOrientation: 'flipY'
+        }).then(bitmap => {
+          this.tiles[tile] = {
+            vertices: new Float32Array([
+              minx, miny, 1, 0, 0,
+              maxx, miny, 1, 1, 0,
+              minx, maxy, 1, 0, 1,
+              minx, maxy, 1, 0, 1,
+              maxx, miny, 1, 1, 0,
+              maxx, maxy, 1, 1, 1
+            ]),
+            image: bitmap,
+          }
+        })
       }
       image.onerror = (err) => {
         console.warn(`Error loading tile ${tile}`, err);

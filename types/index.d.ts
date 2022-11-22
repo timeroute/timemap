@@ -60,7 +60,7 @@ interface TileWorkerMessageData {
 }
 
 interface ImageTileDataProps {
-  image: HTMLImageElement;
+  image: ImageBitmap;
   vertices: Float32Array;
 }
 
